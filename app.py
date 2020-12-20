@@ -39,7 +39,7 @@ def home():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/2016-08-23<br/>"
         f"/api/v1.0/<start>/<end><br/>"
     )
 
@@ -91,7 +91,7 @@ def temperatures():
     session = Session(engine)
 
     """Return a list of temperature observations for the previous year"""
-    # Query the stations
+    # Query the temperature observations
     results = session.query(Measurement.date, Measurement.tobs).\
                     filter(Measurement.station == "USC00519281").\
                     filter(Measurement.date >= "2016-08-23").\
@@ -104,6 +104,20 @@ def temperatures():
     all_tobs = [result[1] for result in results]
 
     return jsonify(all_tobs)
+
+@app.route("/api/v1.0/2016-08-23")
+def start_date():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of tmin, tavg and tmax for all dates greater than
+        and equal to the start date"""
+    # Query the stations
+    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+            filter(Measurement.date >= "2016-08-23").\
+            group_by(Measurement.date).all()
+    
+    return jsonify(results)
 
 
 if __name__ == '__main__':
