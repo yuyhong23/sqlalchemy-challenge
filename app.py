@@ -145,7 +145,15 @@ def start_end_date(start, end):
 #group_by(Measurement.date).all()
     session.close()
 
-    return jsonify(results)
+    all_dates = list(np.ravel(session.query(Measurement.date).all()))
+
+    for date in all_dates:
+        if start == date:
+            for date in all_dates:
+                if end == date:
+                    return jsonify(results)
+
+    return jsonify({"error": f"Date {start} and/or {end} not found."}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
