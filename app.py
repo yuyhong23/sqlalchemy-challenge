@@ -1,3 +1,6 @@
+# Because instructor Khaled said that it's better to import dependencies
+# when we need it for flask, I will do that
+
 import sqlalchemy
 from sqlalchemy import create_engine, func
 
@@ -64,6 +67,8 @@ def precipitation():
 
     return jsonify(preciptations)
 
+import numpy as np
+
 @app.route("/api/v1.0/stations")
 def stations():
     # Create our session (link) from Python to the DB
@@ -76,11 +81,30 @@ def stations():
     session.close()
 
     # Convert list of tuples into normal list
-    import numpy as np
-    
     all_stations = list(np.ravel(results))
 
     return jsonify(all_stations)
+
+@app.route("/api/v1.0/tobs")
+def temperatures():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of temperature observations for the previous year"""
+    # Query the stations
+    results = session.query(Measurement.date, Measurement.tobs).\
+                    filter(Measurement.station == "USC00519281").\
+                    filter(Measurement.date >= "2016-08-23").\
+                    filter(Measurement.prcp.isnot(None)).\
+                    order_by(Measurement.date).all()
+
+    session.close()
+
+    # Create a list of temperature observations for the previous year of data
+    all_tobs = [result[1] for result in results]
+
+    return jsonify(all_tobs)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
