@@ -40,7 +40,7 @@ def home():
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/2016-08-23/2017-08-23<br/>"
+        f"/api/v1.0/<start>/<end><br/>"
     )
 
 from sqlalchemy.orm import Session
@@ -116,9 +116,9 @@ def start_date(start):
         and equal to the start date"""
     
     # Query the tobs
-    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
-            filter(Measurement.date >= start).\
-            group_by(Measurement.date).all()
+    results = list(np.ravel(session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+            filter(Measurement.date >= start).all()))
+    #group_by(Measurement.date).all()
 
     session.close()
 
@@ -131,19 +131,18 @@ def start_date(start):
     return jsonify({"error": f"Date {start} not found."}), 404
 
 
-@app.route("/api/v1.0/2016-08-23/2017-08-23")
-def start_end_date():
+@app.route("/api/v1.0/<start>/<end>")
+def start_end_date(start, end):
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     """Return a list of tmin, tavg and tmax for all dates greater than
         and equal to the start date"""
     # Query the tobs
-    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
-            filter(Measurement.date >= "2016-08-23").\
-            filter(Measurement.date <= "2017-08-23").\
-            group_by(Measurement.date).all()
-    
+    results = list(np.ravel(session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+            filter(Measurement.date >= start).\
+            filter(Measurement.date <= end).all()))
+#group_by(Measurement.date).all()
     session.close()
 
     return jsonify(results)
