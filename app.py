@@ -40,7 +40,7 @@ def home():
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/2016-08-23<br/>"
-        f"/api/v1.0/<start>/<end><br/>"
+        f"/api/v1.0/2016-08-23/2017-08-23<br/>"
     )
 
 from sqlalchemy.orm import Session
@@ -112,13 +112,27 @@ def start_date():
 
     """Return a list of tmin, tavg and tmax for all dates greater than
         and equal to the start date"""
-    # Query the stations
+    # Query the tobs
     results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
             filter(Measurement.date >= "2016-08-23").\
             group_by(Measurement.date).all()
     
     return jsonify(results)
 
+@app.route("/api/v1.0/2016-08-23/2017-08-23")
+def start_end_date():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of tmin, tavg and tmax for all dates greater than
+        and equal to the start date"""
+    # Query the tobs
+    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
+            filter(Measurement.date >= "2016-08-23").\
+            filter(Measurement.date <= "2017-08-23").\
+            group_by(Measurement.date).all()
+    
+    return jsonify(results)
 
 if __name__ == '__main__':
     app.run(debug=True)
