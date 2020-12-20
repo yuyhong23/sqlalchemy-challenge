@@ -1,8 +1,5 @@
 import sqlalchemy
-#from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
-
-#from flask import Flask, jsonify
 
 #################################################
 # Database Setup
@@ -22,6 +19,8 @@ Station = Base.classes.station
 #################################################
 # Flask Setup
 #################################################
+from flask import Flask, jsonify
+
 app = Flask(__name__)
 
 
@@ -35,8 +34,35 @@ def home():
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
-        f"/api/v1.0/stations"
-        f"/api/v1.0/tobs"
-        f"/api/v1.0/<start>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/<start>/<end><br/>"
     )
+
+from sqlalchemy.orm import Session
+
+@app.route("/api/v1.0/precipitation")
+def precipitation():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of all precipitation score 1 year ago"""
+    # Query all passengers
+    results = session.query(Measurement.date, Measurement.prcp).\
+                    filter(Measurement.date >= "2016-08-23").\
+                    filter(Measurement.prcp.isnot(None)).\
+                    order_by(Measurement.date.desc()).all()
+
+    session.close()
+
+    # Create a dictionary with date as key and prcp as value
+    preciptations = []
+    for result in results:
+        precipitation_dict = {result.date: result.prcp}
+        preciptations.append(precipitation_dict)
+
+    return jsonify(preciptations)
+
+if __name__ == '__main__':
+    app.run(debug=True)
