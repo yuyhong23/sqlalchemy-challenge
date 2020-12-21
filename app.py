@@ -118,7 +118,6 @@ def start_date(start):
     # Query the tobs
     results = list(np.ravel(session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
             filter(Measurement.date >= start).all()))
-    #group_by(Measurement.date).all()
 
     session.close()
 
@@ -142,7 +141,7 @@ def start_end_date(start, end):
     results = list(np.ravel(session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).\
             filter(Measurement.date >= start).\
             filter(Measurement.date <= end).all()))
-#group_by(Measurement.date).all()
+
     session.close()
 
     all_dates = list(np.ravel(session.query(Measurement.date).all()))
