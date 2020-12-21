@@ -1,4 +1,4 @@
-# SQLAlchemy = Surfs Up!
+# SQLAlchemy - Surfs Up!
 
 Data and instructions provided by UC Berkeley Extension Data Analytics Bootcamp.
 
